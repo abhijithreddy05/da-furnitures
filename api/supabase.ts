@@ -6,6 +6,15 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
+// Validate required environment variables
+if (!SUPABASE_URL) {
+  console.error('ERROR: VITE_SUPABASE_URL is not set in environment variables');
+}
+
+if (!SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('ERROR: SUPABASE_SERVICE_ROLE_KEY is not set in environment variables');
+}
+
 // Use service role key for API operations
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -19,6 +28,18 @@ export default async function handler(req: any, res: any) {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
+  }
+
+  // Validate environment variables
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Missing environment variables:', { 
+      hasURL: !!SUPABASE_URL, 
+      hasServiceKey: !!SUPABASE_SERVICE_ROLE_KEY 
+    });
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Server configuration error: Missing Supabase credentials. Please add SUPABASE_SERVICE_ROLE_KEY to Vercel environment variables.' 
+    });
   }
 
   try {
